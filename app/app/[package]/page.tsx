@@ -1,12 +1,13 @@
 import { getAppDetails } from '@/lib/api';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
 
-export default async function AppPage({ params }: { params: { package: string } }) {
+export default async function AppPage({ params }: { params: Promise<{ package: string }> }) {
+  const { package: packageName } = await params;
+  
   let app;
   try {
-    app = await getAppDetails(params.package);
+    app = await getAppDetails(packageName);
   } catch {
     notFound();
   }
@@ -38,7 +39,7 @@ export default async function AppPage({ params }: { params: { package: string } 
         {app.description && (
           <div className="bg-gray-800 rounded-xl p-6 mb-6">
             <h2 className="text-2xl font-bold mb-4">?? Description</h2>
-            <p className="text-gray-300 leading-relaxed">{app.description}</p>
+            <p className="text-gray-300 leading-relaxed whitespace-pre-line">{app.description}</p>
           </div>
         )}
 
@@ -70,7 +71,7 @@ export default async function AppPage({ params }: { params: { package: string } 
             <h2 className="text-2xl font-bold mb-4">?? All Versions ({app.versions.length})</h2>
             <div className="space-y-2 max-h-96 overflow-y-auto">
               {app.versions.map((v: any, i: number) => (
-                <div key={i} className="flex justify-between items-center py-2 border-b border-gray-700">
+                <div key={`${v.version}-${i}`} className="flex justify-between items-center py-2 border-b border-gray-700">
                   <span className="font-mono">v{v.version}</span>
                   <span className="text-gray-400">{v.size_mb} MB</span>
                 </div>

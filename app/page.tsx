@@ -105,9 +105,9 @@ export default function Home() {
               </Link>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-              {recentApps.slice(0, 10).map((app) => (
+              {recentApps.slice(0, 10).map((app, index) => (
                 <Link
-                  key={app.package_name}
+                  key={`recent-${app.package_name}-${index}`}
                   href={`/app/${app.package_name}`}
                   className="bg-gray-800 rounded-xl p-4 hover:bg-gray-700 transition group"
                 >
@@ -136,9 +136,9 @@ export default function Home() {
           <div className="max-w-6xl mx-auto">
             <h2 className="text-3xl font-bold mb-6">?? Top This Week</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-              {topApps.slice(0, 10).map((app) => (
+              {topApps.slice(0, 10).map((app, index) => (
                 <Link
-                  key={app.package_name}
+                  key={`top-${app.package_name}-${index}`}
                   href={`/app/${app.package_name}`}
                   className="bg-gray-800 rounded-xl p-4 hover:bg-gray-700 transition"
                 >
@@ -165,7 +165,7 @@ export default function Home() {
               {categories.slice(0, 12).map((cat) => (
                 <Link
                   key={cat.slug}
-                  href={`/category/${cat.slug}`}
+                  href={`/category/${encodeURIComponent(cat.slug)}`}
                   className="bg-gray-800 rounded-xl p-6 hover:bg-gray-700 transition text-center"
                 >
                   <h3 className="font-bold text-lg mb-2">{cat.name}</h3>
