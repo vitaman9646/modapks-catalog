@@ -1,34 +1,23 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+// Принудительно используем /api (внутренний proxy)
+const API_URL = '/api';
 
 export interface App {
+  id: number;
   package_name: string;
   title: string;
+  version: string;
   category: string;
-  icon_url?: string;
-  version: string;
-  size_mb: number;
+  icon: string | null;
+  added: number;
+  size: number;
   downloads: number;
-  added?: string;
-}
-
-export interface AppDetail extends App {
-  description?: string;
-  screenshots?: string[];
-  versions?: AppVersion[];
-}
-
-export interface AppVersion {
-  version: string;
-  size_mb: number;
-  added?: string;
 }
 
 export interface SearchResult {
-  results: App[];
+  apps: App[];
   total: number;
   page: number;
   per_page: number;
-  has_next: boolean;
 }
 
 export interface Category {
@@ -37,52 +26,70 @@ export interface Category {
   count: number;
 }
 
-export interface Stats {
-  total_apps: number;
-  total_downloads: number;
-  total_categories: number;
+export interface AppDetail extends App {
+  description?: string;
+  screenshots?: string[];
+  versions?: {
+    version: string;
+    added: number;
+    size: number;
+    downloads: number;
+  }[];
 }
 
-export async function searchApps(query: string, page = 1): Promise<SearchResult> {
-  const res = await fetch(`${API_URL}/api/search?q=${encodeURIComponent(query)}&page=${page}`);
-  if (!res.ok) throw new Error('Search failed');
-  return res.json();
+export async function searchApps(query: string = '', page: number = 1, limit: number = 20): Promise<SearchResult> {
+  const params = new URLSearchParams({
+    q: query,
+    page: page.toString(),
+    limit: limit.toString(),
+  });
+  
+  const response = await fetch(`${API_URL}/search?${params}`);
+  if (!response.ok) throw new Error('Search failed');
+  return response.json();
 }
 
 export async function getAppDetails(packageName: string): Promise<AppDetail> {
-  const res = await fetch(`${API_URL}/api/app/${packageName}`);
-  if (!res.ok) throw new Error('App not found');
-  return res.json();
+  const response = await fetch(`${API_URL}/app/${packageName}`);
+  if (!response.ok) throw new Error('Failed to fetch app details');
+  return response.json();
 }
 
 export async function getCategories(): Promise<Category[]> {
-  const res = await fetch(`${API_URL}/api/categories`);
-  if (!res.ok) throw new Error('Failed to fetch categories');
-  return res.json();
+  const response = await fetch(`${API_URL}/categories`);
+  if (!response.ok) throw new Error('Failed to fetch categories');
+  return response.json();
 }
 
-export async function getCategoryApps(slug: string, page = 1): Promise<App[]> {
-  const res = await fetch(`${API_URL}/api/categories/${slug}?page=${page}`);
-  if (!res.ok) throw new Error('Failed to fetch apps');
-  return res.json();
+export async function getCategoryApps(slug: string, page: number = 1, perPage: number = 50): Promise<SearchResult> {
+  const params = new URLSearchParams({
+    page: page.toString(),
+    per_page: perPage.toString(),
+  });
+  
+  const response = await fetch(`${API_URL}/categories/${slug}?${params}`);
+  if (!response.ok) throw new Error('Failed to fetch category apps');
+  return response.json();
 }
 
-export async function getTopApps(period: 'week' | 'downloads' | 'new' = 'week'): Promise<App[]> {
-  const res = await fetch(`${API_URL}/api/top/${period}`);
-  if (!res.ok) throw new Error('Failed to fetch top apps');
-  const data = await res.json();
-  return data.top || data.new || [];
+export async function getTopApps(limit: number = 10): Promise<App[]> {
+  const response = await fetch(`${API_URL}/top?limit=${limit}`);
+  if (!response.ok) throw new Error('Failed to fetch top apps');
+  return response.json();
 }
 
-export async function getStats(): Promise<Stats> {
-  const res = await fetch(`${API_URL}/api/stats`);
-  if (!res.ok) throw new Error('Failed to fetch stats');
-  return res.json();
+export async function getRecentlyAdded(limit: number = 50): Promise<App[]> {
+  const response = await fetch(`${API_URL}/recently-added?limit=${limit}`);
+  if (!response.ok) throw new Error('Failed to fetch recently added apps');
+  return response.json();
 }
 
-export async function getAutocomplete(query: string): Promise<{title: string; package_name: string}[]> {
-  const res = await fetch(`${API_URL}/api/search/autocomplete?q=${encodeURIComponent(query)}`);
-  if (!res.ok) return [];
-  const data = await res.json();
-  return data.suggestions || [];
+export async function getStats() {
+  const response = await fetch(`${API_URL}/stats`);
+  if (!response.ok) throw new Error('Failed to fetch stats');
+  return response.json();
+}
+
+export function getDownloadUrl(packageName: string, version: string): string {
+  return `${API_URL}/download?package=${packageName}&version=${version}`;
 }
