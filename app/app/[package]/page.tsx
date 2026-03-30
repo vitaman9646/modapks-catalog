@@ -1,6 +1,7 @@
 import { getAppDetails } from '@/lib/api';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default async function AppPage({ params }: { params: { package: string } }) {
   let app;
@@ -41,11 +42,34 @@ export default async function AppPage({ params }: { params: { package: string } 
           </div>
         )}
 
+        {app.screenshots && app.screenshots.length > 0 && (
+          <div className="bg-gray-800 rounded-xl p-6 mb-6">
+            <h2 className="text-2xl font-bold mb-4">?? Screenshots</h2>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              {app.screenshots.map((screenshot: string, index: number) => (
+                <a 
+                  key={index} 
+                  href={screenshot} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="block rounded-lg overflow-hidden hover:opacity-80 transition"
+                >
+                  <img
+                    src={screenshot}
+                    alt={`Screenshot ${index + 1}`}
+                    className="w-full h-auto"
+                  />
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
+
         {app.versions && app.versions.length > 0 && (
-          <div className="bg-gray-800 rounded-xl p-6">
+          <div className="bg-gray-800 rounded-xl p-6 mb-6">
             <h2 className="text-2xl font-bold mb-4">?? All Versions ({app.versions.length})</h2>
-            <div className="space-y-2">
-              {app.versions.map((v, i) => (
+            <div className="space-y-2 max-h-96 overflow-y-auto">
+              {app.versions.map((v: any, i: number) => (
                 <div key={i} className="flex justify-between items-center py-2 border-b border-gray-700">
                   <span className="font-mono">v{v.version}</span>
                   <span className="text-gray-400">{v.size_mb} MB</span>
