@@ -13,6 +13,9 @@ interface App {
   title: string;
   version: string;
   icon_url?: string;
+  category: string;
+  size_mb: number;
+  added?: string;
 }
 
 interface Category {
@@ -24,6 +27,7 @@ interface Category {
 export default function Home() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [topApps, setTopApps] = useState<App[]>([]);
+  const [recentApps, setRecentApps] = useState<App[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -32,18 +36,21 @@ export default function Home() {
       try {
         const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
         
-        const [statsRes, topRes, catsRes] = await Promise.all([
+        const [statsRes, topRes, recentRes, catsRes] = await Promise.all([
           fetch(`${API_URL}/api/stats`),
           fetch(`${API_URL}/api/top/week`),
+          fetch(`${API_URL}/api/top/new?limit=20`),
           fetch(`${API_URL}/api/categories`),
         ]);
 
         const statsData = await statsRes.json();
         const topData = await topRes.json();
+        const recentData = await recentRes.json();
         const catsData = await catsRes.json();
 
         setStats(statsData);
         setTopApps(topData.top || []);
+        setRecentApps(recentData.new || []);
         setCategories(catsData);
       } catch (error) {
         console.error('Failed to fetch data:', error);
@@ -86,6 +93,42 @@ export default function Home() {
           </Link>
         </div>
       </section>
+
+      {/* Recently Added */}
+      {recentApps.length > 0 && (
+        <section className="py-12 px-4 bg-gray-800/30">
+          <div className="max-w-6xl mx-auto">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-3xl font-bold">?? Recently Added</h2>
+              <Link href="/weekly" className="text-cyan-400 hover:text-cyan-300 transition">
+                View All →
+              </Link>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+              {recentApps.slice(0, 10).map((app) => (
+                <Link
+                  key={app.package_name}
+                  href={`/app/${app.package_name}`}
+                  className="bg-gray-800 rounded-xl p-4 hover:bg-gray-700 transition group"
+                >
+                  <img
+                    src={app.icon_url || '/default-icon.png'}
+                    alt={app.title}
+                    className="w-16 h-16 rounded-xl mx-auto mb-2"
+                  />
+                  <div className="bg-green-500 text-xs font-bold px-2 py-1 rounded-full text-center mb-2">
+                    NEW
+                  </div>
+                  <h3 className="text-sm font-semibold text-center truncate group-hover:text-cyan-400 transition">
+                    {app.title}
+                  </h3>
+                  <p className="text-xs text-gray-400 text-center">v{app.version}</p>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Top Apps */}
       {topApps.length > 0 && (
