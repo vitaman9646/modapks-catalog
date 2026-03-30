@@ -1,6 +1,12 @@
-import { getAppDetails } from '@/lib/api';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+
+async function getAppDetails(packageName: string) {
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://138.124.93.89:8000';
+  const res = await fetch(`${API_URL}/api/app/${packageName}`, { cache: 'no-store' });
+  if (!res.ok) throw new Error('Not found');
+  return res.json();
+}
 
 export default async function AppPage({ params }: { params: Promise<{ package: string }> }) {
   const { package: packageName } = await params;
@@ -12,7 +18,7 @@ export default async function AppPage({ params }: { params: Promise<{ package: s
     notFound();
   }
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://138.124.93.89:8000';
 
   return (
     <main className="min-h-screen bg-gray-900 text-white py-12 px-4">
@@ -30,10 +36,10 @@ export default async function AppPage({ params }: { params: Promise<{ package: s
           <div>
             <h1 className="text-4xl font-bold mb-2">{app.title}</h1>
             <p className="text-gray-400 mb-4">{app.category}</p>
-            <div className="flex flex-wrap gap-4 text-sm">
+            <div className="flex flex-wrap gap-3 text-sm">
               <span className="bg-gray-800 px-3 py-1 rounded-full">?? v{app.version}</span>
               <span className="bg-gray-800 px-3 py-1 rounded-full">?? {app.size_mb} MB</span>
-              <span className="bg-gray-800 px-3 py-1 rounded-full">⬇️ {app.downloads.toLocaleString()} downloads</span>
+              <span className="bg-gray-800 px-3 py-1 rounded-full">⬇️ {app.downloads?.toLocaleString() || 0}</span>
             </div>
           </div>
         </div>
@@ -55,41 +61,43 @@ export default async function AppPage({ params }: { params: Promise<{ package: s
                   href={screenshot} 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="block rounded-lg overflow-hidden hover:opacity-80 transition shadow-lg"
+                  className="block rounded-lg overflow-hidden hover:opacity-80 transition"
                 >
-                  <img
-                    src={screenshot}
-                    alt={`Screenshot ${index + 1}`}
-                    className="w-full h-auto"
-                  />
+                  <img src={screenshot} alt={`Screenshot ${index + 1}`} className="w-full h-auto" />
                 </a>
               ))}
             </div>
           </div>
         )}
 
-        {app.versions && app.versions.length > 0 && (
+        {/* Quick Download */}
+        <div className="text-center mb-8">
+          <a
+            href={`${API_URL}/api/download/${packageName}`}
+            className="inline-block bg-gradient-to-r from-green-500 to-cyan-500 hover:from-green-600 hover:to-cyan-600 text-white font-bold py-4 px-10 rounded-full text-lg transition shadow-lg"
+          >
+            ?? Download Latest Version (v{app.version})
+          </a>
+        </div>
+
+        {/* All Versions */}
+        {app.versions && app.versions.length > 1 && (
           <div className="bg-gray-800 rounded-xl p-6 mb-6">
-            <h2 className="text-2xl font-bold mb-4">?? Available Versions ({app.versions.length})</h2>
-            <div className="space-y-3 max-h-96 overflow-y-auto">
+            <h2 className="text-2xl font-bold mb-4">?? All Versions ({app.versions.length})</h2>
+            <div className="space-y-3 max-h-[500px] overflow-y-auto">
               {app.versions.map((v: any, i: number) => (
                 <div key={`${v.version}-${i}`} className="bg-gray-700/50 rounded-lg p-4 hover:bg-gray-700 transition">
-                  <div className="flex justify-between items-center mb-2">
+                  <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-3">
                     <div>
                       <span className="font-mono text-lg font-bold text-cyan-400">v{v.version}</span>
                       <div className="text-sm text-gray-400 mt-1">
-                        ?? Size: {v.size_mb} MB
-                        {v.added && (
-                          <span className="ml-3">
-                            ?? {new Date(v.added).toLocaleDateString()}
-                          </span>
-                        )}
+                        ?? {v.size_mb} MB
+                        {v.added && <span className="ml-3">?? {new Date(v.added).toLocaleDateString()}</span>}
                       </div>
                     </div>
                     <a
                       href={`${API_URL}/api/download/${packageName}/${v.version}`}
-                      className="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-2 px-6 rounded-full transition"
-                      download
+                      className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-6 rounded-full transition text-center"
                     >
                       ?? Download
                     </a>
@@ -100,25 +108,15 @@ export default async function AppPage({ params }: { params: Promise<{ package: s
           </div>
         )}
 
-        <div className="mt-8 p-6 bg-gradient-to-r from-cyan-900/50 to-blue-900/50 rounded-xl border border-cyan-500/30">
-          <h3 className="text-xl font-bold mb-2">?? Want more MODs?</h3>
-          <p className="text-gray-300 mb-4">Join our Telegram channels for daily updates!</p>
+        {/* Telegram Promo */}
+        <div className="p-6 bg-gradient-to-r from-cyan-900/50 to-blue-900/50 rounded-xl border border-cyan-500/30">
+          <h3 className="text-xl font-bold mb-2">?? More MODs on Telegram!</h3>
+          <p className="text-gray-300 mb-4">Join our channels for daily updates</p>
           <div className="flex flex-wrap gap-3">
-            <a href="https://t.me/apk_games_mod" target="_blank" rel="noopener" className="bg-cyan-500 hover:bg-cyan-600 px-4 py-2 rounded-full text-sm font-bold transition">
-              ?? Games
-            </a>
-            <a href="https://t.me/premium_apps_unlocked" target="_blank" rel="noopener" className="bg-cyan-500 hover:bg-cyan-600 px-4 py-2 rounded-full text-sm font-bold transition">
-              ?? Premium
-            </a>
-            <a href="https://t.me/media_mod_apps" target="_blank" rel="noopener" className="bg-cyan-500 hover:bg-cyan-600 px-4 py-2 rounded-full text-sm font-bold transition">
-              ?? Media
-            </a>
-            <a href="https://t.me/social_mods_pro" target="_blank" rel="noopener" className="bg-cyan-500 hover:bg-cyan-600 px-4 py-2 rounded-full text-sm font-bold transition">
-              ?? Social
-            </a>
-            <a href="https://t.me/all_versions_bot" target="_blank" rel="noopener" className="bg-cyan-500 hover:bg-cyan-600 px-4 py-2 rounded-full text-sm font-bold transition">
-              ?? Bot
-            </a>
+            <a href="https://t.me/apk_games_mod" target="_blank" rel="noopener" className="bg-cyan-500 hover:bg-cyan-600 px-4 py-2 rounded-full text-sm font-bold transition">?? Games</a>
+            <a href="https://t.me/premium_apps_unlocked" target="_blank" rel="noopener" className="bg-cyan-500 hover:bg-cyan-600 px-4 py-2 rounded-full text-sm font-bold transition">?? Premium</a>
+            <a href="https://t.me/social_mods_pro" target="_blank" rel="noopener" className="bg-cyan-500 hover:bg-cyan-600 px-4 py-2 rounded-full text-sm font-bold transition">?? Social</a>
+            <a href="https://t.me/all_versions_bot" target="_blank" rel="noopener" className="bg-cyan-500 hover:bg-cyan-600 px-4 py-2 rounded-full text-sm font-bold transition">?? Bot</a>
           </div>
         </div>
       </div>
