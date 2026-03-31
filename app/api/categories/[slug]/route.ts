@@ -2,8 +2,9 @@ import { NextResponse } from 'next/server';
 
 export async function GET(
   request: Request,
-  { params }: { params: { slug: string } }
+  context: { params: Promise<{ slug: string }> }
 ) {
+  const params = await context.params;
   const { searchParams } = new URL(request.url);
   const page = searchParams.get('page') || '1';
   const per_page = searchParams.get('per_page') || '50';

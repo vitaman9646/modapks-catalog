@@ -2,8 +2,9 @@ import { NextResponse } from 'next/server';
 
 export async function GET(
   request: Request,
-  { params }: { params: { package: string } }
+  context: { params: Promise<{ package: string }> }
 ) {
+  const params = await context.params;
   const packageName = params.package;
   
   const response = await fetch(`http://api.modapks.org/api/app/${packageName}`);
