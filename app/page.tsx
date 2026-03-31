@@ -38,8 +38,8 @@ export default function Home() {
         
         const [statsRes, topRes, recentRes, catsRes] = await Promise.all([
           fetch(`${API_URL}/api/stats`),
-          fetch(`${API_URL}/api/top/week`),
-          fetch(`${API_URL}/api/top/new?limit=20`),
+          fetch(`${API_URL}/top?limit=10`),
+          fetch(`${API_URL}/recently-added?limit=20`),
           fetch(`${API_URL}/api/categories`),
         ]);
 
