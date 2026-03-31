@@ -1,16 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 
-const API_BASE = 'http://138.124.93.89:8000';
-
-export async function GET(request: NextRequest) {
-  const searchParams = request.nextUrl.searchParams;
-  const url = `${API_BASE}/api/recently-added?${searchParams.toString()}`;
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const limit = searchParams.get('limit') || '50';
   
-  try {
-    const response = await fetch(url);
-    const data = await response.json();
-    return NextResponse.json(data);
-  } catch (error) {
-    return NextResponse.json({ error: 'Failed to fetch' }, { status: 500 });
-  }
+  const response = await fetch(`http://api.modapks.org/api/recently-added?limit=${limit}`);
+  const data = await response.json();
+  return NextResponse.json(data);
 }

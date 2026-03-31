@@ -1,21 +1,16 @@
-import { NextRequest, NextResponse } from 'next/server';
-
-const API_BASE = 'http://138.124.93.89:8000';
+import { NextResponse } from 'next/server';
 
 export async function GET(
-  request: NextRequest,
-  context: { params: Promise<{ slug: string }> }
+  request: Request,
+  { params }: { params: { slug: string } }
 ) {
-  const params = await context.params;
-  const slug = params.slug;
-  const searchParams = request.nextUrl.searchParams;
-  const url = `${API_BASE}/api/categories/${slug}?${searchParams.toString()}`;
+  const { searchParams } = new URL(request.url);
+  const page = searchParams.get('page') || '1';
+  const per_page = searchParams.get('per_page') || '50';
   
-  try {
-    const response = await fetch(url);
-    const data = await response.json();
-    return NextResponse.json(data);
-  } catch (error) {
-    return NextResponse.json({ error: 'Failed to fetch' }, { status: 500 });
-  }
+  const response = await fetch(
+    `http://api.modapks.org/api/categories/${params.slug}?page=${page}&per_page=${per_page}`
+  );
+  const data = await response.json();
+  return NextResponse.json(data);
 }
