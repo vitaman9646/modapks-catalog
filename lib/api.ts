@@ -1,5 +1,4 @@
-// Принудительно используем /api (внутренний proxy)
-const API_URL = '/api';
+const API_URL = 'https://api.modapks.org/api';
 
 export interface App {
   id: number;
@@ -44,19 +43,19 @@ export async function searchApps(query: string = '', page: number = 1, limit: nu
     limit: limit.toString(),
   });
   
-  const response = await fetch(`${API_URL}/search?${params}`);
+  const response = await fetch(`${API_URL}/search?${params}`, { cache: 'no-store' });
   if (!response.ok) throw new Error('Search failed');
   return response.json();
 }
 
 export async function getAppDetails(packageName: string): Promise<AppDetail> {
-  const response = await fetch(`${API_URL}/app/${packageName}`);
+  const response = await fetch(`${API_URL}/app/${packageName}`, { cache: 'no-store' });
   if (!response.ok) throw new Error('Failed to fetch app details');
   return response.json();
 }
 
 export async function getCategories(): Promise<Category[]> {
-  const response = await fetch(`${API_URL}/categories`);
+  const response = await fetch(`${API_URL}/categories`, { cache: 'no-store' });
   if (!response.ok) throw new Error('Failed to fetch categories');
   return response.json();
 }
@@ -67,25 +66,25 @@ export async function getCategoryApps(slug: string, page: number = 1, perPage: n
     per_page: perPage.toString(),
   });
   
-  const response = await fetch(`${API_URL}/categories/${slug}?${params}`);
+  const response = await fetch(`${API_URL}/categories/${slug}?${params}`, { cache: 'no-store' });
   if (!response.ok) throw new Error('Failed to fetch category apps');
   return response.json();
 }
 
 export async function getTopApps(limit: number = 10): Promise<App[]> {
-  const response = await fetch(`${API_URL}/top?limit=${limit}`);
+  const response = await fetch(`${API_URL}/top?limit=${limit}`, { cache: 'no-store' });
   if (!response.ok) throw new Error('Failed to fetch top apps');
   return response.json();
 }
 
 export async function getRecentlyAdded(limit: number = 50): Promise<App[]> {
-  const response = await fetch(`${API_URL}/recently-added?limit=${limit}`);
+  const response = await fetch(`${API_URL}/recently-added?limit=${limit}`, { cache: 'no-store' });
   if (!response.ok) throw new Error('Failed to fetch recently added apps');
   return response.json();
 }
 
 export async function getStats() {
-  const response = await fetch(`${API_URL}/stats`);
+  const response = await fetch(`${API_URL}/stats`, { cache: 'no-store' });
   if (!response.ok) throw new Error('Failed to fetch stats');
   return response.json();
 }
