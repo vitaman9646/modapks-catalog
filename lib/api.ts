@@ -1,4 +1,4 @@
-const API_URL = 'https://api.modapks.org/api';
+const API_URL = 'https://api.modapks.org';
 
 export interface App {
   id: number;
