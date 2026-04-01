@@ -21,7 +21,7 @@ export default function WeeklyPage() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.modapks.org';
         const res = await fetch(`${API_URL}/api/top/new?limit=50`);
         const data = await res.json();
         setApps(data.new || []);

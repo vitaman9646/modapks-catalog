@@ -23,7 +23,7 @@ export default function CategoryPage() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.modapks.org';
         const res = await fetch(`${API_URL}/api/categories/${encodeURIComponent(slug)}?per_page=10000`);
         
         if (!res.ok) {

@@ -34,7 +34,7 @@ export default function Home() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.modapks.org';
         
         const [statsRes, topRes, recentRes, catsRes] = await Promise.all([
           fetch(`${API_URL}/api/stats`),
